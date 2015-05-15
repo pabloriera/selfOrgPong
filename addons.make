@@ -1,0 +1,5 @@
+ofxGui
+ofxKinect
+ofxOsc
+ofxControlFloat
+ofxOsc_pb
