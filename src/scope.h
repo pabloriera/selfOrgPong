@@ -1,29 +1,50 @@
-#include "ofMain.h"
-#include <vector>
+#pragma once
 
 
-class scope {
+class scope
+{
 public:
-    scope();
-    
-    void reset();
-    
-    void setup();
-    void update(float value);
-    
-    void draw();
-    ofColor* color;
-    
-    ofVec2f pos;
-    
-    float width;
-    float height;
-    
-    int bufferSize;
-    //vector buffers
-    vector<float> buff;
-    
-    int buff_downsample_val;
-    int buff_downsample_c;
-    
+
+    scope(){}
+
+    scope(int _bufferLen)
+    {
+        bufferLen = _bufferLen;
+        buffer.resize(bufferLen,0);
+    }
+
+    void setup(int _bufferLen)
+    {
+        bufferLen = _bufferLen;
+        buffer.resize(bufferLen,0);
+    }
+
+    void add(float value)
+    {
+        buffer.push_back( value );
+
+        if( buffer.size() >= bufferLen )
+            buffer.erase(buffer.begin(), buffer.begin()+1);
+
+    }
+
+    void draw(int width, int height)
+    {
+        ofBeginShape();
+
+        for (unsigned int i = 0; i < bufferLen; i++){
+            float x =  ofMap(i, 0, bufferLen, 0, width, true);
+            ofVertex(x, buffer[i]*height);
+        }
+
+        ofEndShape(false);
+
+    }
+
+   unsigned int bufferLen;
+
+   vector<float> buffer;
+
+
+
 };
