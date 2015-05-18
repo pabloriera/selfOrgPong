@@ -38,6 +38,7 @@ class ofApp : public ofBaseApp{
     vector<float> ch;
 
     ofxIntSlider threshold;
+    ofxFloatSlider thR, thG;
     ofxPanel gui;
 
     vector<scope> scopes;

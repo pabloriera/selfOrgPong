@@ -3,50 +3,53 @@
 //--------------------------------------------------------------
 void ofApp::setup(){
 
-    
+
     camWidth 		= 640;	// try to grab at this size.
     camHeight 		= 480;
-    
+
     gui.setup();
-    gui.add( threshold.setup("Threshold",20,0,255*3) );
+    gui.add( threshold.setup("Threshold Bg",20,0,255*3) );
+    gui.add( thR.setup("Threshold R",0.5,0,1.0) );
+    gui.add( thG.setup("Threshold G",0.5,0,1.0) );
 //    vidGrabber.setDeviceID(0);
 //    vidGrabber.setDesiredFrameRate(60);
 //    vidGrabber.initGrabber(camWidth,camHeight);
-    
+
     kinect.init();
     kinect.open(0);
-    
+
     background 	= new unsigned char[camWidth*camHeight*3];
     output = new unsigned char[camWidth*camHeight*3];
-    
+
     bBack = false;
-    
+
     totalPixels = camWidth*camHeight;
     for (int i = 0; i < totalPixels*3; i++)
         background[i]=0;
-    
+
     ch.assign(3,0);
-    
+
     dataLen = 400;
-    
+
     scopes.resize(3);
-    
+
     for(int i =0;i<3;i++)
     {
         scopes[i].setup(dataLen);
     }
-    
-    
+
+    thR = 1;thG=1;
+
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-    
+
 //   	ofBackground(100,100,100);
-    
+
 //    vidGrabber.update();
     kinect.update();
-    
+
     if (kinect.isFrameNew()){
 
         unsigned char * pixels = kinect.getPixels();
@@ -58,13 +61,13 @@ void ofApp::update(){
             }
             bBack = false;
         }
-        
+
         int dist;
-        
+
         ch[0]=0;
         ch[1]=0;
         ch[2]=0;
-        
+
         for (int i = 0; i < totalPixels; i++){
             int ii = i*3;
             dist = 0;
@@ -73,7 +76,7 @@ void ofApp::update(){
                 dist +=  abs(pixels[ii+j] - background[ii+j]) ;
                 output[ii+j] = 0;
             }
-            
+
             if (dist >= threshold)
             {
                 for(int j = 0; j < 3; j++)
@@ -82,14 +85,33 @@ void ofApp::update(){
                     output[ii+j] = pixels[ii+j];
                 }
             }
-            
+
         }
         videoTexture.loadData( output , camWidth,camHeight, GL_RGB);
     }
-    
+
     for(int j = 0; j < 3; j++)
     {
-        scopes[j].add( 1 - ch[j]/totalPixels/100 );
+        scopes[j].add( ch[j]/totalPixels/255 );
+    }
+
+    cout << scopes[0].buffer[dataLen-1] << scopes[1].buffer[dataLen-1] << endl;
+
+    if (scopes[0].buffer[dataLen-1] > thR)
+    {
+        sendKeyUp("m");
+        sendKeyDown("k");
+    }
+
+    else if (scopes[1].buffer[dataLen-1] > thG)
+    {
+        sendKeyUp("k");
+        sendKeyDown("m");
+    }
+    else
+    {
+        sendKeyUp("k");
+        sendKeyUp("m");
     }
 
 }
@@ -101,29 +123,29 @@ void ofApp::draw(){
 //    vidGrabber.draw(20,20);
 
     videoTexture.draw(0,0,ofGetWidth(),ofGetHeight());
-    
+
 //    kinect.draw(100,0,ofGetWidth(),ofGetHeight());
-    
+
     gui.draw();
     ofNoFill();
-    
+
     for(int i = 0;i<3;i++)
     {
         ofPushStyle();
         ofPushMatrix();
-        
+
         ofTranslate(32, 370+i*100, 0);
-        
+
         ofSetColor((i==0)*255, (i==1)*255, (i==2)*255);
         ofSetLineWidth(3);
-        
+
         scopes[i].draw( ofGetWidth()/2, 100 );
-        
+
         ofPopMatrix();
         ofPopStyle();
 
     }
-    
+
 
 }
 
@@ -135,8 +157,12 @@ void ofApp::keyPressed(int key){
         bBack = true;
         cout << bBack << endl;
     }
-    
-    
+
+    if (key=='r')
+    {
+
+    }
+
 }
 
 //--------------------------------------------------------------
@@ -147,7 +173,7 @@ void ofApp::keyReleased(int key){
 
 //--------------------------------------------------------------
 void ofApp::mouseMoved(int x, int y ){
-    
+
 
 }
 
@@ -160,7 +186,7 @@ void ofApp::mouseDragged(int x, int y, int button){
 void ofApp::mousePressed(int x, int y, int button){
 
 
-    
+
 }
 
 //--------------------------------------------------------------
@@ -179,6 +205,6 @@ void ofApp::gotMessage(ofMessage msg){
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
+void ofApp::dragEvent(ofDragInfo dragInfo){
 
 }

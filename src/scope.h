@@ -34,7 +34,7 @@ public:
 
         for (unsigned int i = 0; i < bufferLen; i++){
             float x =  ofMap(i, 0, bufferLen, 0, width, true);
-            ofVertex(x, buffer[i]*height);
+            ofVertex(x, (1-buffer[i])*height);
         }
 
         ofEndShape(false);
